@@ -3,8 +3,11 @@ package com.ws.rest.sboot.controller.user;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +41,7 @@ public class UserController {
 	
 	@SuppressWarnings("unused")
 	@PostMapping("/users")
-	public ResponseEntity<User> createUser(@RequestBody User user) {
+	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
 		User saved = userDAO.save(user);
 		
 		URI location = ServletUriComponentsBuilder
@@ -48,13 +51,11 @@ public class UserController {
 			.toUri();
 		
 		return ResponseEntity.created(location).build();
-		
 	}
 	
 	@SuppressWarnings("unused")
 	@PostMapping("/users/update")
 	public ResponseEntity<User> updateUser(@RequestBody User user) {
-		
 		User saved = userDAO.update(user);
 		
 		URI location = ServletUriComponentsBuilder
@@ -62,18 +63,17 @@ public class UserController {
 			.path("/{id}")
 			.buildAndExpand(saved.getId())
 			.toUri();
-		
 		return ResponseEntity.created(location).build();
-		
-	}	
+	}
 	
 	@SuppressWarnings("unused")
-	@PostMapping("/users/delete/{id}")
-	public String deleteUser(@PathVariable int id) {
-		
-		String status = userDAO.delete(id);
-		
-		return status;
-		
-	}	
+	@DeleteMapping("/users/{id}")
+	public User deleteById(@PathVariable int id) {
+		User user = userDAO.deleteById(id);
+		if(user==null) {
+			throw new UserNotFoundException("id-"+id);
+		}
+		return user;
+	}
+
 }
